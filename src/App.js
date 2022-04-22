@@ -1,14 +1,33 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 
 import Card from './components/Card';
 import Header from './components/Header';
 import Drawer from './components/Drawer';
 
 function App() {
+    const [items, setItems] = useState([]);
+    const [cartItems, setCartItems] = useState([]);
+    const [cartOpened, setCartOpened] = useState(false);
+
+    useEffect(() => {
+        fetch('https://6260187b53a42eaa07000895.mockapi.io/items')
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+                setItems(json);
+            });
+    }, []);
+
+    const onAddToCart = (obj) => {
+        setCartItems((prev) => [...prev, obj]);
+    };
+
     return (
         <div className="wrapper clear">
-            <Drawer />
-            <Header />
+            {cartOpened && <Drawer items={cartItems} onClose={() => setCartOpened(false)} />}
+            <Header onClickCart={() => setCartOpened(true)} />
             <div className="content p-40">
                 <div className="d-flex align-center justify-between mb-40">
                     <h1>All shoes</h1>
@@ -17,11 +36,18 @@ function App() {
                         <input placeholder="Searching..." />
                     </div>
                 </div>
-                <div className="d-flex">
-                    <Card />
-                    <Card />
-                    <Card />
-                    <Card />
+                <div className="d-flex flex-wrap">
+                    {items.map((item) => (
+                        <Card
+                            title={item.title}
+                            price={item.price}
+                            imageUrl={item.imageUrl}
+                            onFavorite={() => console.log('Add to favorite')}
+                            onPlus={(obj) => {
+                                onAddToCart(obj);
+                            }}
+                        />
+                    ))}
                 </div>
             </div>
         </div>
